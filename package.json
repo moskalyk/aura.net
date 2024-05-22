@@ -1,0 +1,6 @@
+{
+	"dependencies": {
+		"@fluencelabs/aqua-lib": "^0.7.7",
+		"shamir": "^0.7.1"
+	}
+}

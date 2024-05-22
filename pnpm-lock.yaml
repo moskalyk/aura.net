@@ -1,0 +1,23 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  '@fluencelabs/aqua-lib':
+    specifier: ^0.7.7
+    version: 0.7.7
+  shamir:
+    specifier: ^0.7.1
+    version: 0.7.1
+
+packages:
+
+  /@fluencelabs/aqua-lib@0.7.7:
+    resolution: {integrity: sha512-/RvIwaLGmNuzkoFTRXOp66BTiVVkmljiY1Do3f/wRnYWZO8jdjQ/bmO+v1rhGZ7+DYzTL1YT54Vxt5/ralnPvA==}
+    dev: false
+
+  /shamir@0.7.1:
+    resolution: {integrity: sha512-pZGu0OiH6vbZOZsVRGYCNXsY6v5gvLjJHLJKrmgJYb0fKvhdnxSJu+dnRSg+NPeg9kudMPdTSqDRy0n7JRBP7w==}
+    dev: false

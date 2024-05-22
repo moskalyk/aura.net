@@ -1,0 +1,80 @@
+aqua Main
+
+import "@fluencelabs/aqua-lib/builtin.aqua"
+import "@fluencelabs/aqua-lib/subnet.aqua"
+
+use "deals.aqua"
+use "hosts.aqua"
+import "services.aqua"
+
+-- IMPORTANT: Add exports for all functions that you want to run
+export AuraService, writeAuraShare, register, GatewayService, signIn, alignShare
+
+data HopPacket:
+    username: string
+    shares: []string
+    next_peers: []PeerId
+
+service GatewayService("gatewayService"):
+    registerNode(peer_id: PeerId) -> bool
+    connect(username: string, password: string) -> bool
+    signIn(username: string, password: string) -> HopPacket
+
+service AuraService("auraService"):
+    writeAuraShare(init_peer_id: PeerId, username: string, share: string, holding_peers: []PeerId) -> bool
+    retrieveShare(username: string, hop_packet: HopPacket) -> HopPacket
+
+func connect(peer_id: PeerId, username: string, password: string) -> bool:
+    on peer_id:
+        res <- GatewayService.connect(username, password)
+    <- res
+
+func writeAuraShare(peer_id: PeerId, username: string, share: string, holding_peers: []PeerId) -> bool:
+    on peer_id:
+        res <- AuraService.writeAuraShare(%init_peer_id%, username, share, holding_peers)
+    <- res
+
+func register(hub_peer_id: PeerId) -> bool:
+    on hub_peer_id:
+        res <- GatewayService.registerNode(%init_peer_id%)
+    <- res
+
+func alignShare(peer_id: PeerId, username: string, hop_packet: HopPacket) -> HopPacket:
+    on peer_id:
+        res <- AuraService.retrieveShare(username, hop_packet)
+    <- res
+
+func signIn(hub_peer_id: PeerId, username: string, password: string) -> []HopPacket:
+    sign_up: *bool
+    sign_in: *HopPacket
+    first_hop_res: *HopPacket
+    middle_hop: *HopPacket
+    terminal_hop_res: *HopPacket
+
+    sign_up <<- connect(hub_peer_id, username, password) 
+
+    on hub_peer_id:
+        sign_in <<- GatewayService.signIn(username, password)
+
+    -- check on first peer
+    try:
+        first_hop_res <<- alignShare(sign_in[0].next_peers[0], username, sign_in[0])
+    -- if not, check on second peer
+    otherwise:
+        first_hop_res <<- alignShare(sign_in[0].next_peers[1], username, sign_in[0])
+
+    try:
+        middle_hop <<- alignShare(first_hop_res[0].next_peers[0], username, first_hop_res[0])
+    -- if not, check on second peer
+    otherwise:
+        middle_hop <<- alignShare(first_hop_res[0].next_peers[1], username, first_hop_res[0])
+
+    -- check on last terminal peer
+    try:
+        terminal_hop_res <<- alignShare(middle_hop[0].next_peers[0], username, middle_hop[0])
+    -- if not, check on second peer
+    otherwise:
+        terminal_hop_res <<- alignShare(middle_hop[0].next_peers[1], username, middle_hop[0])
+
+    -- return hop_packet with shares
+    <- terminal_hop_res
