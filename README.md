@@ -1,14 +1,10 @@
-# Fluence Minimal Template
+# aura.net starter
+a shamir key share network that uses a peer mesh with peer-hopping to accumulate peer shares from 3/3 nodes and 2/2 backups to reconstruct a private key
 
-## Usage
+## tech
+- fluence
+- shamir secret sharing
 
-```sh
-# Generate a service template and add it to the default worker
-fluence service new myService
-
-# Deploy the default worker
-fluence deploy
-
-# Uncomment `runDeployedServices` aqua function in `src/aqua/main.aqua` and run it
-fluence run -f 'runDeployedServices()'
-```
+## todo
+- resiliency heartbeat readjusting key shares
+- on-chain verification from gateway
